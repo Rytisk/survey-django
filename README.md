@@ -1,2 +1,3 @@
-# survey-django
-Django survey application
+# Survey Django
+
+Survey application written with Django.
