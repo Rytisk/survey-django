@@ -11,21 +11,29 @@
     <form action="{% url 'survey:vote' resp.question.id %}" method="post">
         {% csrf_token %}
 
-        <div class="input-group mb-3">
-        {% for choice in resp.question.choice_set.all %}
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <div class="input-group-text">
-                        <input type="radio" name="choice"
-                                id="choice{{ forloop.counter }}"
-                                value="{{ choice.id}}" />
-                        <a>{{ choice.choice_text }}</a>
-                    </label> 
+        {% if resp.question.question_type == 'radio' %}
+            <div class="input-group mb-3">
+                {% for choice in resp.question.choice_set.all %}
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="radio" name="choice"
+                                        id="choice{{ forloop.counter }}"
+                                        value="{{ choice.id}}" />
+                                <a>{{ choice.choice_text }}</a>
+                            </label> 
+                            </div>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-        </div>
+        {% else%}
+            <div class="input-group mb-3">
+                <input type="text" name="answer" id="answer" class="form-control" 
+                        placeholder="Answer" aria-label="Answer" 
+                        aria-describedby="basic-addon2">
+            </div>
+        {% endif %}
         <br/>
         <div class="input-group mb-3">
             <input type="text" name="username" id="username" class="form-control" 

@@ -25,20 +25,30 @@ def results(request, question_id):
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
         username = request.POST['username']
+        if question.question_type == 'radio':
+            selected_choice = question.choice_set.get(pk=request.POST['choice'])
+        else:
+            answer = request.POST['answer']
     except (KeyError, Choice.DoesNotExist):
         return render(request, 'survey/index.html', {
             'question': question,
             'error_message': "You didn't select a choice.",
         })
     else:
-        UserResponse.objects.create(
-            user=username,
-            choice=selected_choice,
-            question=question,
-        )
-        selected_choice.votes += 1
-        selected_choice.save(update_fields=["votes"])
+        if question.question_type == 'radio':
+            UserResponse.objects.create(
+                user=username,
+                answer=selected_choice.choice_text,
+                question=question,
+            )
+            selected_choice.votes += 1
+            selected_choice.save(update_fields=["votes"])
+        else:
+            UserResponse.objects.create(
+                user=username,
+                answer=answer,
+                question=question,
+            )
         redirect_url = urls.reverse('survey:index')
         return HttpResponseRedirect(redirect_url)
