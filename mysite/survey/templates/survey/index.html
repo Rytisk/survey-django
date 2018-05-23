@@ -2,6 +2,13 @@
 {% extends "survey/header.html" %}
 {% block content %}
 <h1>Survey</h1>
-<p class="lead">You can take surveys here!</p>
-<a class="btn btn-lg btn-primary" role="button">Take survey</a>
+    {% if questions %}
+        <ul></ul>
+        {% for question in questions %}
+            <li class="lead"><a href="/survey/{{ question.id }}/">{{ question.question_text }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
 {% endblock %}

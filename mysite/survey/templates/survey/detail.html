@@ -1,0 +1,39 @@
+
+{% extends "survey/header.html" %}
+{% block content %}
+<h1>Survey</h1>
+    <p class="lead">{{resp.question.question_text}}</p>
+    <!-- <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-lg btn-primary" >Submit</button>
+    </form> -->
+    <form action="{% url 'survey:vote' resp.question.id %}" method="post">
+        {% csrf_token %}
+
+        <div class="input-group mb-3">
+        {% for choice in resp.question.choice_set.all %}
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <input type="radio" name="choice"
+                                id="choice{{ forloop.counter }}"
+                                value="{{ choice.id}}" />
+                        <a>{{ choice.choice_text }}</a>
+                    </label> 
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+        <br/>
+        <div class="input-group mb-3">
+            <input type="text" name="username" id="username" class="form-control" 
+                    placeholder="Your name" aria-label="Your name" 
+                    aria-describedby="basic-addon2">
+        </div>
+        
+        <br/>
+        <input class="btn btn-primary" type="submit" value="Vote" />
+    </form>
+{% endblock %}
