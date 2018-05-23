@@ -44,4 +44,8 @@
         <br/>
         <input class="btn btn-primary" type="submit" value="Vote" />
     </form>
+    <br/>
+    {% if resp.question.question_type == 'radio' %}
+         <a class="btn btn-lg btn-primary" href="{% url 'survey:results' resp.question.id %}" role="button">Results</a>
+    {% endif %}
 {% endblock %}

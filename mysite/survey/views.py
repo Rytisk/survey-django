@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from survey.models import Question, Choice, UserResponse
 from django import urls
 from django.http import HttpResponse, HttpResponseRedirect
+from graphos.sources.simple import SimpleDataSource
+from graphos.renderers.gchart import ColumnChart
 
 
 def index(request):
@@ -18,8 +20,17 @@ def detail(request, question_id):
 
 
 def results(request, question_id):
-    response = "You're looking at the results of question %s."
-    return HttpResponse(response % question_id)
+    question = get_object_or_404(Question, pk=question_id)
+    choices = list(question.choice_set.all())
+
+    data = [['Choice', 'Votes']]
+    for choice in choices:
+        data.append([choice.choice_text, choice.votes])
+    data_source = SimpleDataSource(data=data)
+    
+    chart = ColumnChart(data_source)
+    context = {'question' : question, 'chart': chart}
+    return render(request, 'survey/results.html', context)
 
 
 def vote(request, question_id):
@@ -29,7 +40,7 @@ def vote(request, question_id):
         if question.question_type == 'radio':
             selected_choice = question.choice_set.get(pk=request.POST['choice'])
         else:
-            answer = request.POST['answer']
+            answer_text = request.POST['answer']
     except (KeyError, Choice.DoesNotExist):
         return render(request, 'survey/index.html', {
             'question': question,
@@ -37,18 +48,18 @@ def vote(request, question_id):
         })
     else:
         if question.question_type == 'radio':
-            UserResponse.objects.create(
-                user=username,
-                answer=selected_choice.choice_text,
-                question=question,
-            )
+            answer = selected_choice.choice_text
             selected_choice.votes += 1
             selected_choice.save(update_fields=["votes"])
+            redirect_url = urls.reverse('survey:results', args=(question_id,))
         else:
-            UserResponse.objects.create(
-                user=username,
-                answer=answer,
-                question=question,
-            )
-        redirect_url = urls.reverse('survey:index')
+            answer = answer_text
+            redirect_url = urls.reverse('survey:index')
+
+        UserResponse.objects.create(
+            user=username,
+            answer=answer,
+            question=question,
+        )
+        
         return HttpResponseRedirect(redirect_url)
